@@ -1,14 +1,14 @@
 package repository
 
-import "../../domain"
+import "github.com/jordanfduarte/vehicle-tracking-system/domain"
 
 // FleetRepository represent repository of the fleet
 // Expect implementation by the infrastructure layer
-type FleetRepository interface {
-	Get(id int) (*domain.Fleet, error)
-	GetAll() ([]domain.Fleet, error)
-	Save(*domain.Fleet) error
+type FleetsRepository interface {
+	Get(id int) (*domain.Fleets, error)
+	GetAll() ([]domain.Fleets, error)
+	Save(*domain.Fleets) error
 	Remove(id int) error
 	RemoveAll() error
-	Update(*domain.Fleet) error
+	Update(*domain.Fleets) error
 }

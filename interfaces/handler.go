@@ -6,12 +6,10 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"net/http"
 	"log"
-	"regexp"
 	"strconv"
-
-	"../application"
-	"../config"
-	"../domain"
+	"github.com/jordanfduarte/vehicle-tracking-system/application"
+	"github.com/jordanfduarte/vehicle-tracking-system/config"
+	"github.com/jordanfduarte/vehicle-tracking-system/domain"
 )
 
 // Run start server
@@ -62,8 +60,8 @@ func Routes() *httprouter.Router {
 	// Salva a posição do veículo)
 	r.POST("/vehicles/:id/positions", positionsPostAction)
 
-	// Executa a migração inicial dos dados
-	migrate()
+	// Migrations
+	r.GET("/migration", migrationAction)
 
 	return r
 }
@@ -73,265 +71,339 @@ func Routes() *httprouter.Router {
 // =============================
 
 func deleteAction(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	// err = application.RemoveFleetAlertAll()
-	// if err != nil {
-	// 	Error(w, http.StatusNotFound, err, err.Error())
-	// 	return
-	// }
-
-	// err = application.RemoveFleetAll()
-	// if err != nil {
-	// 	Error(w, http.StatusNotFound, err, err.Error())
-	// 	return
-	// }
-
-	// err = application.VehiclePositionAll()
-	// if err != nil {
-	// 	Error(w, http.StatusNotFound, err, err.Error())
-	// 	return
-	// }
-
-	err = application.RemoveVehicleAll()
+	err := application.RemoveVehiclePositionAll()
 	if err != nil {
 		Error(w, http.StatusNotFound, err, err.Error())
 		return
 	}
 
-	JSON(w, http.StatusOK, nil)
+	err2 := application.RemoveVehicleAll()
+	if err2 != nil {
+		Error(w, http.StatusNotFound, err2, err2.Error())
+		return
+	}
+
+	err3 := application.RemoveFleetAlertAll()
+	if err3 != nil {
+		Error(w, http.StatusNotFound, err3, err3.Error())
+		return
+	}
+
+	err4 := application.RemoveFleetAll()
+	if err4 != nil {
+		Error(w, http.StatusNotFound, err4, err4.Error())
+		return
+	}
+
+	JSON(w, http.StatusOK, "Delete has been processed")
+}
+
+func fleetsGetAction(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	fleets, err := application.GetAllFleets()
+
+	if err != nil {
+		Error(w, http.StatusNotFound, err, err.Error())
+		return
+	}
+
+	JSON(w, http.StatusOK, fleets)
+}
+// Cria uma frota
+func fleetsPostAction(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	var fleet *domain.Fleets
+	err := json.NewDecoder(r.Body).Decode(&fleet)
+
+    if err != nil {
+        Error(w, http.StatusBadRequest, err, "Invalid parameters entered")
+        return
+    }
+
+	// str := fmt.Sprintf("%v", fleet.Max_Speed)
+	// log.Printf(str)
+	isValid, error := fleet.IsValid()
+	// log.Printf(isValid)
+	if isValid == false {
+		Error(w, http.StatusBadRequest, nil, error)
+		return
+	}
+
+	//criar
+	err2 := application.AddFleet(fleet)
+	if err2 != nil {
+		Error(w, http.StatusNotFound, err2, err2.Error())
+		return
+	}
+
+	type ReturnDinamyc struct {
+		Id int `json:"id"`
+	}
+	returnDinamyc := &ReturnDinamyc{Id: fleet.Fleet_ID}
+	JSON(w, http.StatusCreated, returnDinamyc)
+}
+// lista todas os alertas de uma frota
+func alertsGetAction(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	param := ps.ByName("id")
+	id, err := strconv.Atoi(param)
+	if err != nil {
+		Error(w, http.StatusNotFound, err, err.Error())
+		return
+	}
+
+	// veririca se exist o Fleet
+	fleet, err := application.GetRowFleet(id)
+	if err != nil {
+		Error(w, http.StatusNotFound, err, err.Error())
+		return
+	}
+
+	if fleet.Fleet_ID <= 0 {
+		Error(w, http.StatusNotFound, nil, "")
+		return
+	}
+
+	fleetAlerts, err := application.GetAllFleetAlerts(id)
+	if err != nil {
+		Error(w, http.StatusNotFound, err, err.Error())
+		return
+	}
+
+	JSON(w, http.StatusOK, fleetAlerts)
+}
+// Cria uma alerta para frota
+func alertsPostAction(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	param := ps.ByName("id")
+	id, err := strconv.Atoi(param)
+	if err != nil {
+		Error(w, http.StatusNotFound, err, err.Error())
+		return
+	}
+
+	var fleetAlert *domain.FleetAlerts
+	err2 := json.NewDecoder(r.Body).Decode(&fleetAlert)
+
+    if err2 != nil {
+        Error(w, http.StatusBadRequest, err2, "Invalid parameters entered")
+        return
+    }
+
+	// veririca se exist o Fleet
+	fleet, err := application.GetRowFleet(id)
+	if err != nil {
+		Error(w, http.StatusNotFound, err, err.Error())
+		return
+	}
+
+	if fleet.Fleet_ID <= 0 {
+		Error(w, http.StatusNotFound, nil, "")
+		return
+	}
+
+	// str := fmt.Sprintf("%v", fleet.Max_Speed)
+	// log.Printf(str)
+	isValid := fleetAlert.IsValid()
+	// log.Printf(isValid)
+	if isValid == false {
+		Error(w, http.StatusBadRequest, nil, "")
+		return
+	}
+
+	//criar
+	fleetAlert.Fleet_ID = id
+	err3 := application.AddFleetAlert(fleetAlert)
+	if err3 != nil {
+		Error(w, http.StatusNotFound, err3, err3.Error())
+		return
+	}
+
+	// verificar aqui ......
+	//{ "webhook": "http://localhost:8081/fleet/alert" }
+	//defaultStruct := &domain.DefaultStruct{Id: fleet.Fleet_ID}
+	type ReturnDinamyc struct {
+		WebHook string `json:"webhook"`
+	}
+	returnTypeDinamyc := &ReturnDinamyc{WebHook: fleetAlert.WebHook}
+
+	JSON(w, http.StatusCreated, returnTypeDinamyc)
+}
+
+func vehiclesGetAction(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	// veririca se exist o Fleet
+	vehicles, err := application.GetAllVehicles()
+	if err != nil {
+		Error(w, http.StatusNotFound, err, err.Error())
+		return
+	}
+
+	JSON(w, http.StatusOK, vehicles)
+}
+
+func vehiclesPostAction(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	var vehicle *domain.Vehicles
+	err2 := json.NewDecoder(r.Body).Decode(&vehicle)
+
+    if err2 != nil {
+        Error(w, http.StatusBadRequest, err2, "Invalid parameters entered")
+        return
+    }
+
+	// str := fmt.Sprintf("%v", fleet.Max_Speed)
+	// log.Printf(str)
+	isValid := vehicle.IsValid()
+	// log.Printf(isValid)
+	if isValid == false {
+		Error(w, http.StatusBadRequest, nil, "")
+		return
+	}
+
+	fleet, err := application.GetRowFleet(vehicle.Fleet_ID)
+	if err != nil {
+		Error(w, http.StatusNotFound, err, err.Error())
+		return
+	}
+
+	if fleet.Fleet_ID <= 0 {
+		Error(w, http.StatusNotFound, nil, "")
+		return
+	}
+
+	//criar
+	err3 := application.AddVehicle(vehicle)
+	if err3 != nil {
+		Error(w, http.StatusNotFound, err3, err3.Error())
+		return
+	}
+
+	type ReturnDinamyc struct {
+		Id int `json:"id"`
+	}
+	returnTypeDinamyc := &ReturnDinamyc{Id: vehicle.Vehicle_ID}
+
+	JSON(w, http.StatusCreated, returnTypeDinamyc)
+}
+
+func positionsGetAction(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	param := ps.ByName("id")
+	id, err := strconv.Atoi(param)
+	if err != nil {
+		Error(w, http.StatusNotFound, err, err.Error())
+		return
+	}
+
+	// veririca se exist o Fleet
+	positions, err := application.GetAllPositionsByVehicles(id)
+	if err != nil {
+		Error(w, http.StatusNotFound, err, err.Error())
+		return
+	}
+
+	JSON(w, http.StatusOK, positions)
+}
+
+func positionsPostAction(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	param := ps.ByName("id")
+	id, err := strconv.Atoi(param)
+	if err != nil {
+		Error(w, http.StatusNotFound, err, err.Error())
+		return
+	}
+
+	var vehiclePosition *domain.VehiclePositions
+	err2 := json.NewDecoder(r.Body).Decode(&vehiclePosition)
+
+    if err2 != nil {
+        Error(w, http.StatusBadRequest, err2, "Invalid parameters entered")
+        return
+    }
+
+	// veririca se exist o Fleet
+	vehicle, err := application.GetRowVehicle(id)
+	if err != nil {
+		Error(w, http.StatusNotFound, err, err.Error())
+		return
+	}
+
+	if vehicle.Vehicle_ID <= 0 {
+		Error(w, http.StatusNotFound, nil, "")
+		return
+	}
+
+	// str := fmt.Sprintf("%v", fleet.Max_Speed)
+	// log.Printf(str)
+	isValid := vehiclePosition.IsValid()
+	// log.Printf(isValid)
+	if isValid == false {
+		log.Printf("dfdfd")
+		Error(w, http.StatusBadRequest, nil, "")
+		return
+	}
+
+	//criar
+	vehiclePosition.Vehicle_ID = id
+	vehicleFind, err65 := application.GetRowVehicle(id)
+
+	if err65 != nil {
+		Error(w, http.StatusNotFound, err65, err65.Error())
+		return
+	}
+
+	vehiclePosition.Max_Speed = vehicleFind.Max_Speed
+	err3 := application.AddPositionVehicle(vehiclePosition)
+	if err3 != nil {
+		Error(w, http.StatusNotFound, err3, err3.Error())
+		return
+	}
+
+	// depois de salvo
+	if vehiclePosition.Current_Speed > vehiclePosition.Max_Speed {
+		// busca todos os webhooks cadastrados na frota
+		fleetAlerts, err5 := application.GetAllFleetAlertsByVehicle(id)
+		if err5 != nil {
+			Error(w, http.StatusNotFound, err5, err5.Error())
+			return
+		}
+
+		//Worker Pools
+		jobs := make(chan domain.Site, 100)
+		for w := 1; w <= 3; w++ {
+			go domain.Crawl(w, jobs)
+		}
+
+		for _, fleetAlertSend := range fleetAlerts {
+			jsonValue, _ := json.Marshal(vehiclePosition)
+			//log.Println(fleetAlertSend.WebHook)
+			jobs <- domain.Site{URL: fleetAlertSend.WebHook, Buffer: jsonValue}
+		}
+		close(jobs)
+	}
+
+	type ReturnDinamyc struct {
+		Id int `json:"id"`
+	}
+	returnTypeDinamyc := &ReturnDinamyc{Id: vehiclePosition.Vehicle_Position_ID}
+
+	JSON(w, http.StatusCreated, returnTypeDinamyc)
 }
 
 // index action
-func index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+func indexAction(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	JSON(w, http.StatusOK, "Api is running!")
 }
-
-// func getNews(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-// 	param := ps.ByName("param")
-
-// 	// if param is numeric than search by news_id, otherwise
-// 	// if alphabetic then search by topic.Slug
-// 	newsID, err := strconv.Atoi(param)
-// 	if err != nil {
-// 		// param is alphabetic
-// 		news, err2 := application.GetNewsByTopic(param)
-// 		if err2 != nil {
-// 			Error(w, http.StatusNotFound, err2, err2.Error())
-// 			return
-// 		}
-
-// 		JSON(w, http.StatusOK, news)
-// 		return
-// 	}
-
-// 	// param is numeric
-// 	news, err := application.GetNews(newsID)
-// 	if err != nil {
-// 		Error(w, http.StatusNotFound, err, err.Error())
-// 		return
-// 	}
-
-// 	JSON(w, http.StatusOK, news)
-// }
-
-// func getAllNews(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-// 	queryValues := r.URL.Query()
-// 	status := queryValues.Get("status")
-
-// 	// if status parameter exist draft|deleted|publish
-// 	if status == "draft" || status == "deleted" || status == "publish" {
-// 		news, err := application.GetAllNewsByFilter(status)
-// 		if err != nil {
-// 			Error(w, http.StatusNotFound, err, err.Error())
-// 			return
-// 		}
-
-// 		JSON(w, http.StatusOK, news)
-// 		return
-// 	}
-
-// 	limit := queryValues.Get("limit")
-// 	page := queryValues.Get("page")
-
-// 	// if custom pagination exist news?limit=15&page=2
-// 	if limit != "" && page != "" {
-// 		limit, _ := strconv.Atoi(limit)
-// 		page, _ := strconv.Atoi(page)
-
-// 		if limit != 0 && page != 0 {
-// 			news, err := application.GetAllNews(limit, page)
-// 			if err != nil {
-// 				Error(w, http.StatusNotFound, err, err.Error())
-// 				return
-// 			}
-
-// 			JSON(w, http.StatusOK, news)
-// 			return
-// 		}
-// 	}
-
-// 	news, err := application.GetAllNews(15, 1) // 15, 1 default pagination
-// 	if err != nil {
-// 		Error(w, http.StatusNotFound, err, err.Error())
-// 		return
-// 	}
-
-// 	JSON(w, http.StatusOK, news)
-// }
-
-// func createNews(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-// 	decoder := json.NewDecoder(r.Body)
-// 	var p domain.News
-// 	if err := decoder.Decode(&p); err != nil {
-// 		Error(w, http.StatusNotFound, err, err.Error())
-// 	}
-
-// 	err := application.AddNews(p)
-// 	if err != nil {
-// 		Error(w, http.StatusNotFound, err, err.Error())
-// 		return
-// 	}
-
-// 	JSON(w, http.StatusCreated, nil)
-// }
-
-// func removeNews(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-// 	newsID, err := strconv.Atoi(ps.ByName("news_id"))
-// 	if err != nil {
-// 		Error(w, http.StatusNotFound, err, err.Error())
-// 		return
-// 	}
-
-// 	err = application.RemoveNews(newsID)
-// 	if err != nil {
-// 		Error(w, http.StatusNotFound, err, err.Error())
-// 		return
-// 	}
-
-// 	JSON(w, http.StatusOK, nil)
-// }
-
-// func updateNews(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-// 	decoder := json.NewDecoder(r.Body)
-// 	var p domain.News
-// 	err := decoder.Decode(&p)
-// 	if err != nil {
-// 		Error(w, http.StatusNotFound, err, err.Error())
-// 	}
-
-// 	newsID, err := strconv.Atoi(ps.ByName("news_id"))
-// 	if err != nil {
-// 		Error(w, http.StatusNotFound, err, err.Error())
-// 		return
-// 	}
-
-// 	err = application.UpdateNews(p, newsID)
-// 	if err != nil {
-// 		Error(w, http.StatusNotFound, err, err.Error())
-// 		return
-// 	}
-
-// 	JSON(w, http.StatusOK, nil)
-// }
-
-// =============================
-//    TOPIC
-// =============================
-
-// func getTopic(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-// 	topicID, err := strconv.Atoi(ps.ByName("topic_id"))
-// 	if err != nil {
-// 		Error(w, http.StatusNotFound, err, err.Error())
-// 		return
-// 	}
-
-// 	topic, err := application.GetTopic(topicID)
-// 	if err != nil {
-// 		Error(w, http.StatusNotFound, err, err.Error())
-// 		return
-// 	}
-
-// 	JSON(w, http.StatusOK, topic)
-// }
-
-// func getAllTopic(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-// 	topics, err := application.GetAllTopic()
-// 	if err != nil {
-// 		Error(w, http.StatusNotFound, err, err.Error())
-// 		return
-// 	}
-
-// 	JSON(w, http.StatusOK, topics)
-// }
-
-// func createTopic(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-
-// 	type payload struct {
-// 		Name string `json:"name"`
-// 		Slug string `json:"slug"`
-// 	}
-// 	var p payload
-// 	err := json.NewDecoder(r.Body).Decode(&p)
-// 	if err != nil {
-// 		Error(w, http.StatusNotFound, err, err.Error())
-// 		return
-// 	}
-
-// 	err = application.AddTopic(p.Name, p.Slug)
-// 	if err != nil {
-// 		Error(w, http.StatusNotFound, err, err.Error())
-// 		return
-// 	}
-
-// 	JSON(w, http.StatusCreated, nil)
-// }
-
-// func removeTopic(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-// 	topicID, err := strconv.Atoi(ps.ByName("topic_id"))
-// 	if err != nil {
-// 		Error(w, http.StatusNotFound, err, err.Error())
-// 		return
-// 	}
-
-// 	err = application.RemoveTopic(topicID)
-// 	if err != nil {
-// 		Error(w, http.StatusNotFound, err, err.Error())
-// 		return
-// 	}
-
-// 	JSON(w, http.StatusOK, nil)
-// }
-
-// func updateTopic(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-// 	decoder := json.NewDecoder(r.Body)
-// 	var p domain.Topic
-// 	err := decoder.Decode(&p)
-// 	if err != nil {
-// 		Error(w, http.StatusNotFound, err, err.Error())
-// 	}
-
-// 	topicID, err := strconv.Atoi(ps.ByName("topic_id"))
-// 	if err != nil {
-// 		Error(w, http.StatusNotFound, err, err.Error())
-// 		return
-// 	}
-
-// 	err = application.UpdateTopic(p, topicID)
-// 	if err != nil {
-// 		Error(w, http.StatusNotFound, err, err.Error())
-// 		return
-// 	}
-
-// 	JSON(w, http.StatusOK, nil)
-// }
 
 // =============================
 //    MIGRATE
 // =============================
 
-func migrate(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+func migrationAction(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	_, err := config.DBMigrate()
 	if err != nil {
 		Error(w, http.StatusNotFound, err, err.Error())
 		return
 	}
+
+	// application.AddFleet(&domain.Fleet{Name: "Veículos de perseguição", Max_Speed: 30.55});
+	// application.AddFleet(&domain.Fleet{Name: "Veículos de transporte de prisioneiros", Max_Speed: 25});
+	// application.AddFleet(&domain.Fleet{Name: "Escolta armada", Max_Speed: 22.22});
+
+	log.Println("Migration has been processed")
+	JSON(w, http.StatusOK, "Migration has been processed!")
 }

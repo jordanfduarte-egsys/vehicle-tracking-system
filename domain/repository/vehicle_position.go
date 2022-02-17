@@ -1,14 +1,15 @@
 package repository
 
-import "../../domain"
+import "github.com/jordanfduarte/vehicle-tracking-system/domain"
 
 // VehiclePosition represent repository of the Vehicle Position
 // Expect implementation by the infrastructure layer
-type VehiclePositionRepository interface {
-	Get(id int) (*domain.VehiclePosition, error)
-	GetAll() ([]domain.VehiclePosition, error)
-	Save(*domain.VehiclePosition) error
+type VehiclePositionsRepository interface {
+	Get(id int) (*domain.VehiclePositions, error)
+	GetAll() ([]domain.VehiclePositions, error)
+	GetAllByVeiches(id int) ([]domain.VehiclePositions, error)
+	Save(*domain.VehiclePositions) error
 	Remove(id int) error
 	RemoveAll() error
-	Update(*domain.VehiclePosition) error
+	Update(*domain.VehiclePositions) error
 }

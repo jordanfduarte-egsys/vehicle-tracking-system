@@ -3,28 +3,37 @@ package config
 import (
 	"fmt"
 	"log"
-	"github.com/pelletier/go-toml/cmd/tomll"
-	"github.com/jinzhu/gorm"
+	"github.com/BurntSushi/toml"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 )
 
 var config = ConfigDB{}
 
 // ConfigDB db seting
 type ConfigDB struct {
-	User     string
-	Password string
-	Host     string
-	Port     string
-	Dbname   string
+	User     		string
+	Password 		string
+	Host     		string
+	Port     		string
+	Dbname			string
+}
+
+type Options struct {
+	IsDefaultDbName bool
 }
 
 // ConnectDB returns initialized gorm.DB
-func ConnectDB() (*gorm.DB, error) {
+func ConnectDB(options *Options) (*gorm.DB, error) {
 	config.Read()
 
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", config.User, config.Password, config.Host, config.Port, config.Dbname)
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", config.User, config.Password, config.Host, config.Port, "mysql")
 
-	db, err := gorm.Open("mysql", dsn)
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	if (options.IsDefaultDbName) {
+		useDatatable := fmt.Sprintf("USE %s", config.Dbname)
+		db.Exec(useDatatable)
+	}
 	if err != nil {
 		return nil, err
 	}

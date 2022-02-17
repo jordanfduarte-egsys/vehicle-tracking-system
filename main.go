@@ -1,7 +1,7 @@
 package main
 
 import (
-	"./interfaces"
+	"github.com/jordanfduarte/vehicle-tracking-system/interfaces"
 )
 
 func main() {

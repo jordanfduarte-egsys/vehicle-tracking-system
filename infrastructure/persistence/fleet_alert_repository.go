@@ -1,28 +1,51 @@
 package persistence
 
 import (
-	"github.com/jinzhu/gorm"
-	// _ "github.com/jinzhu/gorm/dialects/mysql"
-	"../../domain"
-	"../../domain/repository"
+	"gorm.io/gorm"
+	//_ "gorm.io/gorm/dialects/mysql"
+	"github.com/jordanfduarte/vehicle-tracking-system/domain"
+	"github.com/jordanfduarte/vehicle-tracking-system/domain/repository"
 )
 
-// FleetAlertRepositoryImpl Implements repository.FleetAlertRepository
+// FleetAlertRepositoryImpl Implements repository.FleetAlertsRepository
 type FleetAlertRepositoryImpl struct {
 	Conn *gorm.DB
 }
 
 // FleetAlertNewsRepositoryWithRDB returns initialized FleetAlertRepositoryImpl
-func FleetAlertRepositoryWithRDB(conn *gorm.DB) repository.FleetAlertRepository {
+func FleetAlertRepositoryWithRDB(conn *gorm.DB) repository.FleetAlertsRepository {
 	return &FleetAlertRepositoryImpl{Conn: conn}
 }
 
 func (r *FleetAlertRepositoryImpl) Remove(id int) error {
-	tx := r.Conn.Begin()
-	if err := tx.Delete().Error; err != nil {
-		tx.Rollback()
+	return nil
+}
+
+func (r *FleetAlertRepositoryImpl) RemoveAll() error {
+	return r.Conn.Exec("DELETE FROM fleet_alerts").Error
+}
+
+func (r *FleetAlertRepositoryImpl) GetAll(id int) ([]domain.FleetAlerts, error) {
+	fleetAlerts := []domain.FleetAlerts{}
+	if err := r.Conn.Find(&fleetAlerts, "Fleet_ID = ?", id).Error; err != nil {
+		return nil, err
+	}
+
+	return fleetAlerts, nil
+}
+
+func (r *FleetAlertRepositoryImpl) Get(id int) (*domain.FleetAlerts, error) {
+	return nil, nil
+}
+
+func (r *FleetAlertRepositoryImpl) Save(fleetAlert *domain.FleetAlerts) error {
+	if err := r.Conn.Create(&fleetAlert).Error; err != nil {
 		return err
 	}
 
-	return tx.Commit().Error
+	return nil
+}
+
+func (r *FleetAlertRepositoryImpl) Update(*domain.FleetAlerts) error {
+	return nil
 }
