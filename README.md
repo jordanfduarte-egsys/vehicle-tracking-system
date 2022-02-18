@@ -23,7 +23,8 @@ go get -u github.com/jordanfduarte/mysql-driver-go
 
 # Isso pode demorar alguns minutos
 
-# Para correção de um problema com o drivr mysql onde esta retornando 404 no host https://gorm.io/driver/mysql dificultando o download da dependência para o projeto, fazer o seguintes comando
+# Para correção de um problema com o drivr mysql onde esta retornando 404 no host "https://gorm.io/driver/mysql"
+# e dificultando assim o download da dependência do projeto, executar os seguintes comandos
 mv $GOPATH/src/gorm.io/driver/mysql/ $GOPATH/src/gorm.io/driver/_OLD_mysql/
 cp -R $GOPATH/src/github.com/jordanfduarte/mysql-driver-go/ $GOPATH/src/gorm.io/driver/mysql/
 
