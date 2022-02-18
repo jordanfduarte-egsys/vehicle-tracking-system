@@ -10,8 +10,13 @@ import (
     "github.com/julienschmidt/httprouter"
     "net/http"
     "github.com/jordanfduarte/vehicle-tracking-system/application"
+    "github.com/jordanfduarte/vehicle-tracking-system/domain/repository"
     "github.com/jordanfduarte/vehicle-tracking-system/domain"
     "encoding/json"
+    // "log"
+    "strconv"
+    "io"
+    "fmt"
 )
 
 type VehicleHandler struct {}
@@ -31,13 +36,69 @@ func (bc VehicleHandler) VehiclesGetAction(w http.ResponseWriter, r *http.Reques
 }
 
 func (bc VehicleHandler) VehiclesPostAction(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-    var vehicle *domain.Vehicles
-    err2 := json.NewDecoder(r.Body).Decode(&vehicle)
+    vehicle := &domain.Vehicles{}
 
-    if err2 != nil {
-        Error(w, http.StatusBadRequest, err2, "Invalid parameters entered")
-        return
-    }
+    // err2 := json.NewDecoder(r.Body).Decode(&vehicle)
+    // strategy for get optional value name Max_Speed nul or float32
+    dec := json.NewDecoder(r.Body)
+    var validNext = false
+    var nameInit string
+    IsNullMaxSpeed := true
+	for {
+		t, err := dec.Token()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+            continue
+		}
+		//log.Printf("%T: %v", t, t)
+        value := fmt.Sprintf("%v", t)
+
+        if value == "fleet_id" {
+            validNext = true
+            nameInit = "fleet_id"
+            continue
+        }
+
+        if value == "name" && !validNext {
+            validNext = true
+            nameInit = "name"
+            continue
+        }
+
+        if value == "max_speed" && !validNext {
+            validNext = true
+            nameInit = "max_speed"
+            continue
+        }
+
+        if validNext {
+            if nameInit == "fleet_id" {
+                idFleet, err := strconv.Atoi(fmt.Sprintf("%v", t))
+                if err != nil {
+                    continue
+                }
+                vehicle.Fleet_ID = idFleet
+                validNext = false
+            }
+
+            if nameInit == "name" {
+                vehicle.Name = fmt.Sprintf("%v", t)
+                validNext = false
+            }
+
+            if nameInit == "max_speed" {
+                value, err := strconv.ParseFloat(fmt.Sprintf("%v", t), 32)
+                if err != nil {
+                    continue
+                }
+                vehicle.Max_Speed = float32(value)
+                validNext = false
+                IsNullMaxSpeed = false
+            }
+        }
+	}
 
     isValid, _ := vehicle.IsValid()
     if isValid == false {
@@ -56,7 +117,10 @@ func (bc VehicleHandler) VehiclesPostAction(w http.ResponseWriter, r *http.Reque
         return
     }
 
-    err3 := application.AddVehicle(vehicle)
+    vehicleCheckNullParam := &repository.VehicleCheckNullParam{
+        Vehicles: vehicle,
+        IsNullMaxSpeed: IsNullMaxSpeed}
+    err3 := application.AddVehicle(vehicleCheckNullParam)
     if err3 != nil {
         Error(w, http.StatusNotFound, err3, err3.Error())
         return

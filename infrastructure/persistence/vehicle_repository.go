@@ -72,9 +72,20 @@ func (r *VehicleRepositoryImpl) Get(id int) (*domain.Vehicles, error) {
     return vehicle, nil
 }
 
-func (r *VehicleRepositoryImpl) Save(vehicle *domain.Vehicles) error {
-    if err := r.Conn.Create(&vehicle).Error; err != nil {
-        return err
+func (r *VehicleRepositoryImpl) Save(vehicleCheckNullParam *repository.VehicleCheckNullParam) error {
+    if vehicleCheckNullParam.IsNullMaxSpeed {
+        sqlStatement  := `INSERT INTO vehicles (Fleet_ID, Name, Max_Speed) VALUES (?, ?, NULL)`
+        r.Conn.Exec(
+            sqlStatement,
+            vehicleCheckNullParam.Vehicles.Fleet_ID,
+            vehicleCheckNullParam.Vehicles.Name)
+
+        r.Conn.Raw(`
+            SELECT * FROM vehicles ORDER BY Vehicle_ID DESC LIMIT 1`).Scan(&vehicleCheckNullParam.Vehicles)
+    } else {
+        if err := r.Conn.Create(&vehicleCheckNullParam.Vehicles).Error; err != nil {
+            return err
+        }
     }
 
     return nil

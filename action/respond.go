@@ -37,7 +37,6 @@ type SuccessResponse struct {
     Message string
 }
 
-
 func Respond(w http.ResponseWriter, code int, src interface{}) {
     var body []byte
     var err error

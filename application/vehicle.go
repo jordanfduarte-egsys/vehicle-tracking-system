@@ -10,6 +10,7 @@ import (
     "github.com/jordanfduarte/vehicle-tracking-system/config"
     "github.com/jordanfduarte/vehicle-tracking-system/domain"
     "github.com/jordanfduarte/vehicle-tracking-system/infrastructure/persistence"
+    "github.com/jordanfduarte/vehicle-tracking-system/domain/repository"
 )
 
 func RemoveVehicleAll() error {
@@ -22,7 +23,7 @@ func RemoveVehicleAll() error {
     return repo.RemoveAll()
 }
 
-func AddVehicle(vehicle *domain.Vehicles) error {
+func AddVehicle(vehicle *repository.VehicleCheckNullParam) error {
     conn, err := config.ConnectDB(&config.Options{IsDefaultDbName: true})
     if err != nil {
         return err
