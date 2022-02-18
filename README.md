@@ -9,6 +9,9 @@ cadastrados através de goroutines e http requests.
 Primeiro, certifique-se de ter configurado \$GOPATH.
 
 ```bash
+# utilize o comando para força Go a se comportar da maneira $GOPATH, mesmo fora do $GOPATH.
+export GO111MODULE=off
+
 # Download do projeto
 go get github.com/jordanfduarte/vehicle-tracking-system
 
@@ -18,9 +21,6 @@ go get github.com/jordanfduarte/vehicle-tracking-system
 Defina o ambiente do projeto e execute
 
 ```bash
-# utilize o comando para força Go a se comportar da maneira $GOPATH, mesmo fora do $GOPATH.
-export GO111MODULE=off
-
 # vá para o diretorio do projeto
 cd $GOPATH/src/github.com/jordanfduarte/vehicle-tracking-system
 
