@@ -21,7 +21,11 @@ func VehiclePositionRepositoryWithRDB(conn *gorm.DB) repository.VehiclePositions
 }
 
 func (r *VehiclePositionRepositoryImpl) RemoveAll() error {
-    return r.Conn.Exec( "DELETE FROM vehicle_positions" ).Error
+    e := r.Conn.Exec("DELETE FROM vehicle_positions").Error
+    if e != nil {
+        return e
+    }
+    return r.Conn.Exec("ALTER TABLE vehicle_positions AUTO_INCREMENT=0;").Error
 }
 
 func (r *VehiclePositionRepositoryImpl) GetAllByVeiches(id int) ([]domain.VehiclePositions, error) {

@@ -11,6 +11,7 @@ import "github.com/jordanfduarte/vehicle-tracking-system/domain"
 type FleetsRepository interface {
     Get(id int) (*domain.Fleets, error)
     GetAll() ([]domain.Fleets, error)
+    GetFirst() (*domain.Fleets, error)
     Save(*domain.Fleets) error
     RemoveAll() error
 }

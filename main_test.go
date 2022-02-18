@@ -14,9 +14,11 @@ import (
     "encoding/json"
     "testing"
     "bytes"
+    "strconv"
     "github.com/julienschmidt/httprouter"
     "github.com/jordanfduarte/vehicle-tracking-system/domain"
     "github.com/jordanfduarte/vehicle-tracking-system/action"
+    "github.com/jordanfduarte/vehicle-tracking-system/application"
 )
 
 // Test endpoint FleetsGet
@@ -80,13 +82,17 @@ func TestAlertsGetAction(t *testing.T) {
     if err != nil {
         t.Fatal(err)
     }
+
+    fleet, _ := application.GetFirstFleetRow()
+    iToa := strconv.Itoa(fleet.Fleet_ID)
+
     req.Header.Set("Content-Type", "application/json")
     rr := httptest.NewRecorder()
     handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
         action.NewAlertsHandler().AlertsGetAction(w, r, httprouter.Params{
             httprouter.Param{
                 Key: "id",
-                Value: "1",
+                Value: iToa,
             },
         })
     })
@@ -107,13 +113,16 @@ func TestAlertsPostAction(t *testing.T) {
     if err != nil {
         t.Fatal(err)
     }
+
+    fleet, _ := application.GetFirstFleetRow()
+    iToa := strconv.Itoa(fleet.Fleet_ID)
     req.Header.Set("Content-Type", "application/json")
     rr := httptest.NewRecorder()
     handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
         action.NewAlertsHandler().AlertsPostAction(w, r, httprouter.Params{
             httprouter.Param{
                 Key: "id",
-                Value: "1",
+                Value: iToa,
             },
         })
     })
@@ -158,8 +167,10 @@ func TestVehiclesGetAction(t *testing.T) {
 
 // Test endpoint VehiclesPost
 func TestVehiclesPostAction(t *testing.T) {
+    fleet, _ := application.GetFirstFleetRow()
+
     vehicle := &domain.Vehicles{
-        Fleet_ID: 1,
+        Fleet_ID: fleet.Fleet_ID,
         Name: "veículo 1",
         Max_Speed: 50,
     }
@@ -201,12 +212,15 @@ func TestPositionsGetAction(t *testing.T) {
         t.Fatal(err)
     }
 
+    vehicle, _ := application.GetFirstVehicleRow()
+    iToa := strconv.Itoa(vehicle.Vehicle_ID)
+
     rr := httptest.NewRecorder()
     handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
         action.NewVehiclePositionHandler().PositionsGetAction(w, r, httprouter.Params{
             httprouter.Param{
                 Key: "id",
-                Value: "1",
+                Value: iToa,
             },
         })
     })
@@ -228,6 +242,8 @@ func TestPositionsPostAction(t *testing.T) {
         Current_Speed: 0,
     }
 
+    vehicle, _ := application.GetFirstVehicleRow()
+    iToa := strconv.Itoa(vehicle.Vehicle_ID)
     var jsonStr, _ = json.Marshal(vehiclePosition)
     req, err := http.NewRequest(http.MethodPost, "/vehicles/{id}/positions", bytes.NewBuffer(jsonStr))
     if err != nil {
@@ -239,7 +255,7 @@ func TestPositionsPostAction(t *testing.T) {
         action.NewVehiclePositionHandler().PositionsPostAction(w, r, httprouter.Params{
             httprouter.Param{
                 Key: "id",
-                Value: "1",
+                Value: iToa,
             },
         })
     })

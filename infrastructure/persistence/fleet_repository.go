@@ -21,7 +21,19 @@ func FleetRepositoryWithRDB(conn *gorm.DB) repository.FleetsRepository {
 }
 
 func (r *FleetRepositoryImpl) RemoveAll() error {
-    return r.Conn.Exec( "DELETE FROM fleets" ).Error
+    e := r.Conn.Exec("DELETE FROM fleets").Error
+    if e != nil {
+        return e
+    }
+    return r.Conn.Exec("ALTER TABLE fleets AUTO_INCREMENT=0;").Error
+}
+
+func (r *FleetRepositoryImpl) GetFirst() (*domain.Fleets, error) {
+    fleets := &domain.Fleets{}
+    r.Conn.Raw(`
+        SELECT * FROM fleets ORDER BY Fleet_ID ASC LIMIT 1`).Find(&fleets)
+
+    return fleets, nil
 }
 
 func (r *FleetRepositoryImpl) GetAll() ([]domain.Fleets, error) {

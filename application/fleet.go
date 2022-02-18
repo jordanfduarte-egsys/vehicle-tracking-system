@@ -50,3 +50,13 @@ func GetRowFleet(id int) (*domain.Fleets, error) {
     return repo.Get(id)
 }
 
+func GetFirstFleetRow() (*domain.Fleets, error) {
+    conn, err := config.ConnectDB(&config.Options{IsDefaultDbName: true})
+    if err != nil {
+        return nil, err
+    }
+
+    repo := persistence.FleetRepositoryWithRDB(conn)
+    return repo.GetFirst()
+}
+

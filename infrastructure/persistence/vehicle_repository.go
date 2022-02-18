@@ -21,7 +21,11 @@ func VehicleRepositoryWithRDB(conn *gorm.DB) repository.VehiclesRepository {
 }
 
 func (r *VehicleRepositoryImpl) RemoveAll() error {
-    return r.Conn.Exec( "DELETE FROM vehicles" ).Error
+    e := r.Conn.Exec("DELETE FROM vehicles").Error
+    if e != nil {
+        return e
+    }
+    return r.Conn.Exec("ALTER TABLE vehicles AUTO_INCREMENT=0;").Error
 }
 
 func (r *VehicleRepositoryImpl) GetAll() ([]domain.Vehicles, error) {
@@ -70,6 +74,14 @@ func (r *VehicleRepositoryImpl) Get(id int) (*domain.Vehicles, error) {
         FROM vehicles v WHERE Vehicle_ID = ?`, id).Scan(&vehicle)
 
     return vehicle, nil
+}
+
+func (r *VehicleRepositoryImpl) GetFirst() (*domain.Vehicles, error) {
+    vehicles := &domain.Vehicles{}
+    r.Conn.Raw(`
+        SELECT * FROM vehicles ORDER BY Vehicle_ID ASC LIMIT 1`).Find(&vehicles)
+
+    return vehicles, nil
 }
 
 func (r *VehicleRepositoryImpl) Save(vehicleCheckNullParam *repository.VehicleCheckNullParam) error {

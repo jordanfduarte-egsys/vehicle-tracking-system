@@ -19,6 +19,7 @@ type VehiclesRepository interface {
     Get(id int) (*domain.Vehicles, error)
     GetAll() ([]domain.Vehicles, error)
     GetAllFleetAlertsByVehicle(id int) ([]domain.FleetAlerts, error)
+    GetFirst() (*domain.Vehicles, error)
     Save(*VehicleCheckNullParam) error
     RemoveAll() error
 }

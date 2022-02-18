@@ -63,3 +63,13 @@ func GetAllFleetAlertsByVehicle(id int) ([]domain.FleetAlerts, error) {
     repo := persistence.VehicleRepositoryWithRDB(conn)
     return repo.GetAllFleetAlertsByVehicle(id)
 }
+
+func GetFirstVehicleRow() (*domain.Vehicles, error) {
+    conn, err := config.ConnectDB(&config.Options{IsDefaultDbName: true})
+    if err != nil {
+        return nil, err
+    }
+
+    repo := persistence.VehicleRepositoryWithRDB(conn)
+    return repo.GetFirst()
+}

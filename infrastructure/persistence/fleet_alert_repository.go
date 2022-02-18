@@ -21,7 +21,11 @@ func FleetAlertRepositoryWithRDB(conn *gorm.DB) repository.FleetAlertsRepository
 }
 
 func (r *FleetAlertRepositoryImpl) RemoveAll() error {
-    return r.Conn.Exec("DELETE FROM fleet_alerts").Error
+    e := r.Conn.Exec("DELETE FROM fleet_alerts").Error
+    if e != nil {
+        return e
+    }
+    return r.Conn.Exec("ALTER TABLE fleet_alerts AUTO_INCREMENT=0;").Error
 }
 
 func (r *FleetAlertRepositoryImpl) GetAll(id int) ([]domain.FleetAlerts, error) {
