@@ -194,7 +194,7 @@ curl --location --request DELETE 'localhost:8000/database'
 ![diagrama](https://raw.githubusercontent.com/jordanfduarte/vehicle-tracking-system/master/assets/diagrama-db.png)
 
 
-## Lista de pendências de itens do produto
+## Lista de pendências de itens do produto (Backlog)
 
 - [x] **Obrigatório:** Banco de dados Mysql
 - [x] **Obrigatório:** Criação dos endpoints
@@ -205,6 +205,12 @@ curl --location --request DELETE 'localhost:8000/database'
 - [x] **Obrigatório:** Testes
 - [ ] **Opcional:** Deploy
 - [x] **Opcional:** Fluxograma
+
+## Alteração da porta de execução do projeto
+
+- Acessar o arquivo /interfaces/handler.go
+- Trocar a porta padrão de 8000 para outra xxxx
+
 
 ## Referencias & Bibliotecas & Dicas
 
