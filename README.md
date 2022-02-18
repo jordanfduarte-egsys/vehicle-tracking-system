@@ -15,6 +15,16 @@ export GO111MODULE=off
 # Download do projeto
 go get github.com/jordanfduarte/vehicle-tracking-system
 
+# Download das dependências
+go get -u github.com/jinzhu/inflection
+go get -u github.com/jinzhu/now
+go get -u gorm.io/gorm
+go get -u github.com/jordanfduarte/mysql-driver-go
+
+# Copia de pasta não existente mais no servidor https://gorm.io/driver/mysql
+cp -R $GOPATH/src/github.com/jordanfduarte/mysql-driver-go/ $GOPATH/src/gorm.io/driver/mysql/
+
+
 # Isso pode demorar alguns minutos
 ```
 
