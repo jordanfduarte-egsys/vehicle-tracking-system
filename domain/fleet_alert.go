@@ -8,6 +8,7 @@ package domain
 
 import (
     "net/url"
+    "strings"
 )
 
 type FleetAlerts struct {
@@ -31,10 +32,11 @@ func (a *FleetAlerts) IsValid() (isValid bool, error string) {
        }
 
     u, err := url.Parse(a.WebHook)
-       if err != nil || u.Scheme == "" || u.Host == "" {
-          isValid = false
-       }
-       //fmt.Println(u)
+    if err != nil || u.Scheme == "" || u.Host == "" {
+        isValid = false
+    } else {
+        a.WebHook = strings.TrimSpace(a.WebHook)
+    }
 
     return isValid, ""
 }
