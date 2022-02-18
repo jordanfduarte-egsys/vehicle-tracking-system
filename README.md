@@ -42,6 +42,9 @@ docker-compose up --detach
 # ou utilizar o comando ambos fazem a mesma coisa
 docker run --name mysql -e MYSQL_ROOT_PASSWORD=docker -p 3306:3306 -d mysql:latest
 
+# Executar o comando docker ps para verificar se o container mysql está ativo
+docker ps
+
 # executa o projeto
 go run main.go
 
