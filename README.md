@@ -2,7 +2,7 @@
 
 O objetivo do projeto é receber a localização do veículo com a sua velocidade atual. Caso
 a velocidade atual esteja acima do cadastrado, é enviado uma notificação para os sistemas
-cadastrados através de goroutines.
+cadastrados através de goroutines e http requests.
 
 ## Instalação e Execução
 
@@ -27,7 +27,7 @@ docker-compose up
 # ou utilizar o comando ambos fazem a mesma coisa
 docker run --name mysql -e MYSQL_ROOT_PASSWORD=docker -d -p 3306:3306  mysql:latest
 
-# força Go a se comportar da maneira $GOPATH, mesmo fora do $GOPATH.
+# utilize o comando para força Go a se comportar da maneira $GOPATH, mesmo fora do $GOPATH.
 export GO111MODULE=off
 
 # executa o projeto
@@ -66,7 +66,7 @@ go test -v
     - vehicle.go (RemoveVehicleAll, AddVehicle, GetAllVehicles)
 - Domain
   - Entity struct que representam o mapeamento para o modelo de dados
-    - factory.go - Factory de criação de objetos d modelos de dados
+    - factory.go - Factory de criação de objetos dos modelos de dados
     - fleet_alert.go
     - fleet.go
     - site_goroutine.go - Implementação do goroutine
@@ -94,7 +94,7 @@ go test -v
 
 #### /database
 
-- `DELETE` : Limpa toda a base de dados
+- `DELETE` : Limpa toda a base de dados inclusive os registros iniciais cadastrados no endpoint `/migration`
 
 #### /fleets
 
@@ -103,6 +103,7 @@ go test -v
 
 #### /fleets/{id}/alerts
 
+- `{id}` : ID da frota
 - `GET` : Lista todas os alertas de uma frota)
 - `POST` : Cria uma alerta para frota
 
@@ -113,12 +114,13 @@ go test -v
 
 #### /vehicles/{id}/positions
 
+- `{id}` : ID do veículo
 - `GET` : lista todos as posições de um veículo
 - `POST` : Salva a posição do veículo
 
-### Link Documentação dos endpoints
+### Link da documentação dos endpoints
 
-> Documentação api no Postman https://documenter.getpostman.com/view/3003865/UVkiTync
+> Postman https://documenter.getpostman.com/view/3003865/UVkiTync
 
 
 Listagem de frotas, URL GET `/fleets`
@@ -183,15 +185,15 @@ curl --location --request DELETE 'localhost:8000/database'
 
 ## Lista de pendências de itens do produto
 
-- [x] **Mandatory:** Banco de dados Mysql
-- [x] **Mandatory:** Criação dos endpoints
+- [x] **Obrigatório:** Banco de dados Mysql
+- [x] **Obrigatório:** Criação dos endpoints
   - [x] DDD
   - [x] TDD
   - [x] Factory para criação de objetos
   - [x] WorkerPoll
-- [x] **Mandatory:** Testes
-- [ ] **Opsional:** Deploy
-- [x] **Opsional:** Fluxograma
+- [x] **Obrigatório:** Testes
+- [ ] **Opcional:** Deploy
+- [x] **Opcional:** Fluxograma
 
 ## Referencias & Bibliotecas & Dicas
 
