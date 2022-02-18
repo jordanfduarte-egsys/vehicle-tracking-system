@@ -183,6 +183,17 @@ Limpeza da base de dados, URL DELETE `/database`
 curl --location --request DELETE 'localhost:8000/database'
 ```
 
+## FLuxograma da API
+
+![alt text](https://github.com/jordanfduarte/vehicle-tracking-system/blob/master/fluxograma-1.png?raw=true)
+
+![alt text](https://github.com/jordanfduarte/vehicle-tracking-system/blob/master/fluxograma-2.png?raw=true)
+
+## Diagrama do banco de dados
+
+![alt text](https://github.com/jordanfduarte/vehicle-tracking-system/blob/master/diagrama-db.png?raw=true)
+
+
 ## Lista de pendências de itens do produto
 
 - [x] **Obrigatório:** Banco de dados Mysql
