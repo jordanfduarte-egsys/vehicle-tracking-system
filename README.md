@@ -21,11 +21,11 @@ go get -u github.com/jinzhu/now
 go get -u gorm.io/gorm
 go get -u github.com/jordanfduarte/mysql-driver-go
 
+# Isso pode demorar alguns minutos
+
 # Copia de pasta não existente mais no servidor https://gorm.io/driver/mysql
 cp -R $GOPATH/src/github.com/jordanfduarte/mysql-driver-go/ $GOPATH/src/gorm.io/driver/mysql/
 
-
-# Isso pode demorar alguns minutos
 ```
 
 Defina o ambiente do projeto e execute
