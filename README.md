@@ -212,7 +212,7 @@ curl --location --request DELETE 'localhost:8000/database'
 - Trocar a porta padrão de 8000 para outra xxxx
 
 
-## Referencias & Bibliotecas & Dicas
+## Referências & Bibliotecas & Dicas
 
 - DDD Skeleton : https://github.com/takashabe/go-ddd-sample
 - Httprouter : https://github.com/julienschmidt/httprouter
