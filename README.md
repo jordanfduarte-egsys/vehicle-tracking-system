@@ -25,7 +25,7 @@ Defina o ambiente do projeto e execute
 cd $GOPATH/src/github.com/jordanfduarte/vehicle-tracking-system
 
 # criar o container da ultima versão do mysql com o Docker
-docker-compose up
+docker-compose up --detach
 
 # ou utilizar o comando ambos fazem a mesma coisa
 docker run --name mysql -e MYSQL_ROOT_PASSWORD=docker -d -p 3306:3306  mysql:latest
