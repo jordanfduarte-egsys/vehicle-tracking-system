@@ -185,13 +185,13 @@ curl --location --request DELETE 'localhost:8000/database'
 
 ## FLuxograma da API
 
-![alt text](https://github.com/jordanfduarte/vehicle-tracking-system/blob/master/fluxograma-1.png?raw=true)
+![fluxograma1](https://raw.githubusercontent.com/jordanfduarte/vehicle-tracking-system/master/assets/fluxograma-1-db.png)
 
-![alt text](https://github.com/jordanfduarte/vehicle-tracking-system/blob/master/fluxograma-2.png?raw=true)
+![fluxograma2](https://raw.githubusercontent.com/jordanfduarte/vehicle-tracking-system/master/assets/fluxograma-2-db.png)
 
 ## Diagrama do banco de dados
 
-![alt text](https://github.com/jordanfduarte/vehicle-tracking-system/blob/master/diagrama-db.png?raw=true)
+![diagrama](https://raw.githubusercontent.com/jordanfduarte/vehicle-tracking-system/master/assets/diagrama-db.png)
 
 
 ## Lista de pendências de itens do produto
