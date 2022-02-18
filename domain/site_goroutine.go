@@ -34,7 +34,7 @@ func sending(wId int, url string, buffer []byte) int {
     resp, err2 := client.Do(req)
     var statusCode int
     if err2 != nil {
-        fmt.Printf("Status returned %s of hostname %s\n", err2.Error(), url)
+        fmt.Printf("Status returned ERROR of hostname %s\n", url)
         statusCode = 400
     } else {
         fmt.Printf("Status returned %s of hostname %s\n", resp.Status, url)

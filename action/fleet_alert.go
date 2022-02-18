@@ -66,7 +66,6 @@ func (bc AlertsHandler) AlertsPostAction(w http.ResponseWriter, r *http.Request,
         return
     }
 
-    // veririca se exist o Fleet
     fleet, err := application.GetRowFleet(id)
     if err != nil {
         Error(w, http.StatusNotFound, err, err.Error())
@@ -78,16 +77,12 @@ func (bc AlertsHandler) AlertsPostAction(w http.ResponseWriter, r *http.Request,
         return
     }
 
-    // str := fmt.Sprintf("%v", fleet.Max_Speed)
-    // log.Printf(str)
     isValid, _ := fleetAlert.IsValid()
-    // log.Printf(isValid)
     if isValid == false {
         Error(w, http.StatusBadRequest, nil, "")
         return
     }
 
-    //criar
     fleetAlert.Fleet_ID = id
     err3 := application.AddFleetAlert(fleetAlert)
     if err3 != nil {
@@ -95,13 +90,6 @@ func (bc AlertsHandler) AlertsPostAction(w http.ResponseWriter, r *http.Request,
         return
     }
 
-    // verificar aqui ......
-    //{ "webhook": "http://localhost:8081/fleet/alert" }
-    //defaultStruct := &domain.DefaultStruct{Id: fleet.Fleet_ID}
-    // type ReturnDynamic struct {
-    //     Id int `json:"id"`
-    // }
     returnTypeDynamic := &ReturnDynamic{Id: fleetAlert.Fleet_Alert_ID}
-
     JSON(w, http.StatusCreated, returnTypeDynamic)
 }

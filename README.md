@@ -1,19 +1,204 @@
-#Docker Mysql
-    docker run --name mysql -e MYSQL_ROOT_PASSWORD=docker -d -p 3306:3306  mysql:latest
+# Vehicle Tracking System
 
+O objetivo do projeto é receber a localização do veículo com a sua velocidade atual. Caso
+a velocidade atual esteja acima do cadastrado, é enviado uma notificação para os sistemas
+cadastrados através de goroutines.
 
+## Instalação e Execução
+
+Primeiro, certifique-se de ter configurado \$GOPATH.
+
+```bash
+# Download do projeto
+go get github.com/jordanfduarte/vehicle-tracking-system
+
+# Isso pode demorar alguns minutos
+```
+
+Defina o ambiente do projeto e execute
+
+```bash
+# vá para o diretorio do projeto
+cd $GOPATH/src/jordanfduarte/vehicle-tracking-system
+
+# criar o container da ultima versão do mysql com o Docker
+docker-compose up
+
+# ou utilizar o comando ambos fazem a mesma coisa
+docker run --name mysql -e MYSQL_ROOT_PASSWORD=docker -d -p 3306:3306  mysql:latest
+
+# força Go a se comportar da maneira $GOPATH, mesmo fora do $GOPATH.
 export GO111MODULE=off
 
-#gerenciador de dependencias
-    go get -u github.com/golang/dep/cmd/dep
-    dep init
-    #https://imasters.com.br/back-end/gerenciando-dependencias-em-golang
+# executa o projeto
+go run main.go
 
+# Endpoint da api:
+http://localhost:8000/
+
+# Executar inicialmente antes de qual quer request a url de migração de dados
+http://localhost:8000/migration
+```
+
+## Testes
+```bash
+
+# para realizar os testes dos endpoints exeutar o comando
 go test -v
+```
 
-#documentação
-https://documenter.getpostman.com/view/3003865/UVkiTync
-------------------------------------------------------------
-#https://github.com/jojoarianto/go-ddd-api
-#https://go.dev/tour/basics/11
-#https://yashodgayashan.medium.com/factory-design-pattern-in-golang-d2fc92223ee2
+## Estrutura de pastas do projeto
+- Action
+  - Implementa os Handler dos endpoints
+    - database.go (DatabaseAction)
+    - fleet_alert.go (AlertsGetAction, AlertsPostAction)
+    - fleet.go (FleetsGetAction, FleetsPostAction)
+    - index.go (IndexAction)
+    - migration.go (MigrationAction)
+    - respond.go (Respond, Error, JSON) - Responsável pelo prepago do retorno JSON
+    - vehicle_position.go (PositionsGetAction, PositionsPostAction)
+    - vehicle.go (VehiclesGetAction, VehiclesPostAction)
+- Application
+  - Escrever lógica de negócios
+    - fleet_alert.go (RemoveFleetAlertAll, GetAllFleetAlerts, AddFleetAlert)
+    - fleet.go (AddFleet, RemoveFleetAll, GetAllFleets, GetRowFleet)
+    - vehicle_position.go (RemoveVehiclePositionAll, GetAllPositionsByVehicles, AddPositionVehicle)
+    - vehicle.go (RemoveVehicleAll, AddVehicle, GetAllVehicles)
+- Domain
+  - Entity struct que representam o mapeamento para o modelo de dados
+    - factory.go - Factory de criação de objetos d modelos de dados
+    - fleet_alert.go
+    - fleet.go
+    - site_goroutine.go - Implementação do goroutine
+    - vehicle_position.go
+    - vehicle.go
+  - Repository para infraestrutura
+- Infrastructure
+  - Implementa a interface do repositório
+    - fleet_alert_repository.go
+    - fleet_repository.go
+    - vehicle_position_repository.go
+    - vehicle_repository.go
+- Interfaces
+  - Configuração das rotas e chamadas dos Handlers
+
+## URL ENDPOINT
+
+#### /migration
+
+- `GET` : Migra os dados iniciais da base de dados (Cria as tabelas e cria alguns registros iniciais)
+
+#### /index
+
+- `GET` : Index da api
+
+#### /database
+
+- `DELETE` : Limpa toda a base de dados
+
+#### /fleets
+
+- `GET` : Lista todas as frotas
+- `POST` : Cria uma frota
+
+#### /fleets/{id}/alerts
+
+- `GET` : Lista todas os alertas de uma frota)
+- `POST` : Cria uma alerta para frota
+
+#### /vehicles
+
+- `GET` : Lista todos os veículos
+- `POST`: Cria uma veículo
+
+#### /vehicles/{id}/positions
+
+- `GET` : lista todos as posições de um veículo
+- `POST` : Salva a posição do veículo
+
+### Link Documentação dos endpoints
+
+> Documentação api no Postman https://documenter.getpostman.com/view/3003865/UVkiTync
+
+
+Listagem de frotas, URL GET `/fleets`
+```bash
+curl --location --request GET 'localhost:8000/fleets'
+```
+
+Criação de frota, URL PUT `/fleets`
+```bash
+curl --location --request POST 'localhost:8000/fleets' \
+--data-raw '{ "name": "Veículos de perseguição", "max_speed": 10 }'
+```
+
+
+Endpoint para recuperar todos os alertas cadastrados em uma frota, URL GET `/fleets/1/alerts`
+
+```bash
+curl --location --request GET 'localhost:8000/fleets/1/alerts'
+```
+
+Adicionar um novo alerta para uma frota, URL POST `/fleets/1/alerts`
+
+```bash
+curl --location --request POST 'localhost:8000/fleets/1/alerts' \
+--data-raw '{ "webhook": "http://host:8080/dsds/dsds" }'
+```
+
+Recupera todos os veículos, URL GET `/vehicles`
+
+```bash
+curl --location --request GET 'localhost:8000/vehicles'
+```
+
+Adiciona um novo veículo, URL POST `/vehicles`
+
+```bash
+curl --location --request POST 'localhost:8000/vehicles' \
+--data-raw '{"fleet_id": 2, "name": "veículo 3", "max_speed": null}'
+```
+
+Recupera as posições de um veículo, URL GET `/vehicles/{id}/positions`
+```bash
+curl --location --request GET 'localhost:8000/vehicles/1/positions' \
+--data-raw ''
+```
+
+Adiciona uma nova posição para um veículo, URL POST `/vehicles/{id}/positions`
+```bash
+curl --location --request POST 'localhost:8000/vehicles/1/positions' \
+--data-raw '{ "timestamp": "ISO-8601", "latitude": 0, "longitude": 0, "current_speed": 1000 }'
+```
+
+Cria a estrutura inicial do banco de dados, URL GET `/migration`
+```bash
+curl --location --request GET 'localhost:8000/migration'
+```
+
+Limpeza da base de dados, URL DELETE `/database`
+```bash
+curl --location --request DELETE 'localhost:8000/database'
+```
+
+## Lista de pendências de itens do produto
+
+- [x] **Mandatory:** Banco de dados Mysql
+- [x] **Mandatory:** Criação dos endpoints
+  - [x] DDD
+  - [x] TDD
+  - [x] Factory para criação de objetos
+  - [x] WorkerPoll
+- [x] **Mandatory:** Testes
+- [ ] **Opsional:** Deploy
+- [x] **Opsional:** Fluxograma
+
+## Referencias & Bibliotecas & Dicas
+
+- DDD Skeleton : https://github.com/takashabe/go-ddd-sample
+- Httprouter : https://github.com/julienschmidt/httprouter
+- GORM Documentation : https://gorm.io/
+- Toml : https://github.com/BurntSushi/toml
+- Docker : https://hub.docker.com/_/mysql
+- Tests : https://medium.com/@sheimyrahman/golang-go-e-tdd-para-iniciantes-2418b6eadd92
+- GO111MODULE=off : https://maelvls.dev/go111module-everywhere/
