@@ -185,9 +185,9 @@ curl --location --request DELETE 'localhost:8000/database'
 
 ## FLuxograma da API
 
-![fluxograma1](https://raw.githubusercontent.com/jordanfduarte/vehicle-tracking-system/master/assets/fluxograma-1-db.png)
+![fluxograma1](https://raw.githubusercontent.com/jordanfduarte/vehicle-tracking-system/master/assets/fluxograma-1.db.png)
 
-![fluxograma2](https://raw.githubusercontent.com/jordanfduarte/vehicle-tracking-system/master/assets/fluxograma-2-db.png)
+![fluxograma2](https://raw.githubusercontent.com/jordanfduarte/vehicle-tracking-system/master/assets/fluxograma-2.db.png)
 
 ## Diagrama do banco de dados
 
