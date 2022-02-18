@@ -18,6 +18,9 @@ go get github.com/jordanfduarte/vehicle-tracking-system
 Defina o ambiente do projeto e execute
 
 ```bash
+# utilize o comando para força Go a se comportar da maneira $GOPATH, mesmo fora do $GOPATH.
+export GO111MODULE=off
+
 # vá para o diretorio do projeto
 cd $GOPATH/src/github.com/jordanfduarte/vehicle-tracking-system
 
@@ -26,9 +29,6 @@ docker-compose up
 
 # ou utilizar o comando ambos fazem a mesma coisa
 docker run --name mysql -e MYSQL_ROOT_PASSWORD=docker -d -p 3306:3306  mysql:latest
-
-# utilize o comando para força Go a se comportar da maneira $GOPATH, mesmo fora do $GOPATH.
-export GO111MODULE=off
 
 # executa o projeto
 go run main.go
