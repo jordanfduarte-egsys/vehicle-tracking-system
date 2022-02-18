@@ -19,7 +19,7 @@ Defina o ambiente do projeto e execute
 
 ```bash
 # vá para o diretorio do projeto
-cd $GOPATH/src/jordanfduarte/vehicle-tracking-system
+cd $GOPATH/src/github.com/jordanfduarte/vehicle-tracking-system
 
 # criar o container da ultima versão do mysql com o Docker
 docker-compose up
