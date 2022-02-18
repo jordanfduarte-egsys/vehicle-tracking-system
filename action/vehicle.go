@@ -38,21 +38,19 @@ func (bc VehicleHandler) VehiclesGetAction(w http.ResponseWriter, r *http.Reques
 func (bc VehicleHandler) VehiclesPostAction(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
     vehicle := &domain.Vehicles{}
 
-    // err2 := json.NewDecoder(r.Body).Decode(&vehicle)
-    // strategy for get optional value name Max_Speed nul or float32
     dec := json.NewDecoder(r.Body)
     var validNext = false
     var nameInit string
     IsNullMaxSpeed := true
-	for {
-		t, err := dec.Token()
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
+    for {
+        t, err := dec.Token()
+        if err == io.EOF {
+            break
+        }
+        if err != nil {
             continue
-		}
-		//log.Printf("%T: %v", t, t)
+        }
+        //log.Printf("%T: %v", t, t)
         value := fmt.Sprintf("%v", t)
 
         if value == "fleet_id" {
@@ -98,7 +96,7 @@ func (bc VehicleHandler) VehiclesPostAction(w http.ResponseWriter, r *http.Reque
                 IsNullMaxSpeed = false
             }
         }
-	}
+    }
 
     isValid, _ := vehicle.IsValid()
     if isValid == false {

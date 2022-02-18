@@ -11,8 +11,8 @@ import (
 **/
 
 type VehicleCheckNullParam struct {
-	Vehicles   *domain.Vehicles
-	IsNullMaxSpeed bool
+    Vehicles   *domain.Vehicles
+    IsNullMaxSpeed bool
 }
 
 type VehiclesRepository interface {
