@@ -201,7 +201,7 @@ curl --location --request DELETE 'localhost:8000/database'
   - [x] DDD
   - [x] TDD
   - [x] Factory para criação de objetos
-  - [x] WorkerPoll
+  - [x] WorkerPool
 - [x] **Obrigatório:** Testes
 - [ ] **Opcional:** Deploy
 - [x] **Opcional:** Fluxograma
