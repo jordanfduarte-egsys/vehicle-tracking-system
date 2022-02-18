@@ -9,6 +9,10 @@ export GO111MODULE=off
     dep init
     #https://imasters.com.br/back-end/gerenciando-dependencias-em-golang
 
+go test -v
+
+#documentação
+https://documenter.getpostman.com/view/3003865/UVkiTync
 ------------------------------------------------------------
 #https://github.com/jojoarianto/go-ddd-api
 #https://go.dev/tour/basics/11

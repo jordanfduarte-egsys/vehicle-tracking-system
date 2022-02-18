@@ -1,31 +1,32 @@
 package config
 
-import (
-	"fmt"
-	"log"
+/**
+* Package used to configure migrations
+* @package config
+* @author Jordan Duarte
+**/
 
-	"gorm.io/gorm"
-	"github.com/jordanfduarte/vehicle-tracking-system/domain"
-	//"github.com/jordanfduarte/vehicle-tracking-system/application"
+import (
+    "fmt"
+    "log"
+    "gorm.io/gorm"
+    "github.com/jordanfduarte/vehicle-tracking-system/domain"
 )
 
 // DBMigrate will create & migrate the tables, then make the some relationships if necessary
 func DBMigrate() (*gorm.DB, error) {
-	conn, err := ConnectDB(&Options{IsDefaultDbName: false})
-	// var config = ConfigDB{}
-	// config.Read()
+    conn, err := ConnectDB(&Options{IsDefaultDbName: false})
 
-	if err != nil {
-		return nil, err
-	}
-	// defer conn.Close()
+    if err != nil {
+        return nil, err
+    }
 
-	queryCreateDatabase := fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s", config.Dbname)
-	useDatatable := fmt.Sprintf("USE %s", config.Dbname)
-	log.Printf("[DEBUG] "+queryCreateDatabase)
-	conn.Exec(queryCreateDatabase)
-	conn.Exec(useDatatable)
-	conn.AutoMigrate(domain.FleetAlerts{}, domain.Fleets{}, domain.VehiclePositions{}, domain.Vehicles{})
+    queryCreateDatabase := fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s", config.Dbname)
+    useDatatable := fmt.Sprintf("USE %s", config.Dbname)
+    log.Printf("[DEBUG] "+queryCreateDatabase)
+    conn.Exec(queryCreateDatabase)
+    conn.Exec(useDatatable)
+    conn.AutoMigrate(domain.FleetAlerts{}, domain.Fleets{}, domain.VehiclePositions{}, domain.Vehicles{})
 
-	return conn, nil
+    return conn, nil
 }
